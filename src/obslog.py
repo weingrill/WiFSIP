@@ -72,8 +72,12 @@ class ObservationLog():
         user = 'guest'
         host = 'pera.aip.de'
         password='IwmDs!'
-
-        database = psycopg2.connect(database=database, user=user, host=host, password=password) 
+        
+        self.instrument = instrument
+        database = psycopg2.connect(database=database, 
+                                    user=user, 
+                                    host=host, 
+                                    password=password) 
         cursor = database.cursor()
         query = """SELECT object, min(dateobs) 
         from obs 
