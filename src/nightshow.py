@@ -124,26 +124,26 @@ class NightShow():
         plt.title('Temperatures')
         plt.plot(self.dates, self.data['tbay'],'b', label='bay')
         plt.plot(self.dates, self.data['taussen'],'r', label='outside')
-        plt.plot(self.dates, self.data['tlounge'],'g', label='lounge')
-        ax.legend(fontsize='small')
+        self.splplot(self.dates, self.data['tlounge'],'g', label='lounge')
+        ax.legend(loc=2, fontsize='small')
         self.plot_bar(ax)
         self.plot_xticks(nolabels=True)
         plt.ylabel(u"\N{DEGREE SIGN}C")
     
         ax = plt.subplot(3,1,2)
         plt.plot(self.dates, self.data['tspec'],'r', label='spec')
-        plt.plot(self.dates, self.data['ttable'],'g', label='table')
-        ax.legend(fontsize='small')
+        self.splplot(self.dates, self.data['ttable'],'g', label='table')
+        ax.legend(loc=2, fontsize='small')
         self.plot_bar(ax)
         self.plot_xticks(nolabels=True)
         plt.ylabel(u"\N{DEGREE SIGN}C")
         
         ax = plt.subplot(3,1,3)
-        plt.plot(self.dates, self.data['telectr'],'r', label='electr')
-        plt.plot(self.dates, self.data['tlab'],'b', label='lab')
-        plt.plot(self.dates, self.data['toil1'],'c', label='oil1')
-        plt.plot(self.dates, self.data['toil2'],'m', label='oil2')
-        ax.legend(fontsize='small')
+        self.splplot(self.dates, self.data['telectr'], 'r', label='electr', smooth=4)
+        self.splplot(self.dates, self.data['tlab'],'b', label='lab')
+        self.splplot(self.dates, self.data['toil1'],'c', label='oil1', smooth=1)
+        self.splplot(self.dates, self.data['toil2'],'m', label='oil2', smooth=1)
+        ax.legend(loc=2, fontsize='small')
         self.plot_bar(ax)
         self.plot_xticks()
         plt.ylabel(u"\N{DEGREE SIGN}C")
@@ -168,24 +168,30 @@ class NightShow():
         #plt.show()
         plt.close()
 
-    def pressure(self):
+    def splplot(self, x, y, color, label='', smooth=0.5):
         import scipy.interpolate as spyint
         from astronomy import mjd, caldat
-        from numpy import array,power
-        #p0 = array(self.data['paussen'])/0.769584
-        t0 = array(self.data['taussen'])+ 273.15 
-        p0 = array(self.data['paussen'])/power(1.0-(0.0065*2200.0/t0),5.255)
-        mdates = np.array([mjd(d) for d in self.dates])
-        sp = spyint.splrep(mdates, p0,s=0.5)
-        x = np.linspace(mdates[0], mdates[-1], 500)
-        xdates = [caldat(xi) for xi in x]
-        int_paussen = spyint.splev(x, sp)
+        
+        mdates = np.array([mjd(d) for d in x])
+        sp = spyint.splrep(mdates, y, s=smooth)
+        x1 = np.linspace(mdates[0], mdates[-1], 288)
+        xdates = [caldat(xi) for xi in x1]
+        y1 = spyint.splev(x1, sp)
 
+        plt.plot(xdates, y1, color, label=label)
+        
+
+    def pressure(self):
+        #from numpy import array,power
+        #p0 = array(self.data['paussen'])/0.769584
+        t0 = np.array(self.data['taussen'])+ 273.15 
+        p0 = np.array(self.data['paussen'])/np.power(1.0-(0.0065*2200.0/t0),5.255)
+        
         ax = plt.subplot(1,1,1)
         plt.title('Pressure')
         #plt.plot(self.dates, self.data['paussen'],'g')
-        plt.plot(xdates, int_paussen,'k')
-        yticks = array(plt.yticks()[0])
+        self.splplot(self.dates, p0,'k')
+        yticks = np.array(plt.yticks()[0])
         plt.yticks(yticks,['%4.0f' % y for y in yticks])
         self.plot_bar(ax)
         self.plot_xticks()
@@ -226,7 +232,7 @@ class NightShow():
     def dust(self):
         ax = plt.subplot(1,1,1)
         plt.title('Dust')
-        plt.semilogy(self.dates, self.data['dust'],'k')
+        plt.semilogy(self.dates, self.data['dust'],'k', drawstyle='steps')
         self.plot_bar(ax)
         self.plot_xticks()
         plt.ylabel('dust')
