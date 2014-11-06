@@ -102,6 +102,12 @@ class ObservationLog():
         for c in columns:
             i = columns.index(c)
             self.data[c] = [r[i] for r in result]
+        from matplotlib import rcParams
+        params = {'backend': 'Agg',
+              'savefig.dpi' : 100,
+              'figure.figsize': [9.6, 6]
+              }
+        rcParams.update(params)
 
     def plot(self):
         plt.subplot(1,1,1)
@@ -116,7 +122,10 @@ class ObservationLog():
             plt.barh(ypos, width, left=left, align='center')
         plt.yticks(obj_pos, self.objects)
         plt.xlabel('Performance')
-        plt.title('Observation log')
+        if self.instrument==1:
+            plt.title('Observation Log STELLA2')
+        elif self.instrument==2:
+            plt.title('Observation Log STELLA1')
         plt.subplots_adjust(top = 0.90,left=0.22, bottom=0.10,right=0.95)
         
         start = self.data['dateobs'][0]

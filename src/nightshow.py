@@ -5,32 +5,7 @@ Created on Oct 17, 2014
 
 @author: jwe
 
- date     | timestamp without time zone | not null
- tbay     | real                        | 
- tspec    | real                        | 
- telectr  | real                        | 
- ttable   | real                        | 
- taussen  | real                        | 
- hbay     | real                        | 
- hspec    | real                        | 
- helectr  | real                        | 
- haussen  | real                        | 
- solz     | real                        | 
- paussen  | real                        | 
- wind     | real                        | 
- windpeak | real                        | 
- winddir  | real                        | 
- windbay  | real                        | 
- lx       | real                        | 
- rain     | real                        | 
- good     | character(1)                | 
- dust     | real                        | 
- tlounge  | real                        | 
- tlab     | real                        | 
- toil1    | real                        | 
- toil2    | real                        | 
-
-
+produce graphs for the environmental plots of stella
 '''
 import psycopg2
 import datetime
@@ -41,6 +16,8 @@ import numpy as np
 
 class NightShow():
     def __init__(self):
+        """
+        """
         database  = 'stella'
         user = 'guest'
         host = 'pera.aip.de'
@@ -64,7 +41,13 @@ class NightShow():
         
         
         self.dates = self.data['date']
-    
+        from matplotlib import rcParams
+        params = {'backend': 'Agg',
+              'savefig.dpi' : 100,
+              'figure.figsize': [9.6, 6]
+              }
+        rcParams.update(params)
+     
     def plot_bar(self, axis):
         """
         plot agreen vertical bar for every five minute where the conditions are 
@@ -125,7 +108,10 @@ class NightShow():
         plt.plot(self.dates, self.data['tbay'],'b', label='bay')
         plt.plot(self.dates, self.data['taussen'],'r', label='outside')
         self.splplot(self.dates, self.data['tlounge'],'g', label='lounge')
-        ax.legend(loc=2, fontsize='small')
+        try:
+            ax.legend(loc=2, fontsize='small')
+        except TypeError:
+            ax.legend(loc=2)
         self.plot_bar(ax)
         self.plot_xticks(nolabels=True)
         plt.ylabel(u"\N{DEGREE SIGN}C")
@@ -133,7 +119,10 @@ class NightShow():
         ax = plt.subplot(3,1,2)
         plt.plot(self.dates, self.data['tspec'],'r', label='spec')
         self.splplot(self.dates, self.data['ttable'],'g', label='table')
-        ax.legend(loc=2, fontsize='small')
+        try:
+            ax.legend(loc=2, fontsize='small')
+        except TypeError:
+            ax.legend(loc=2)
         self.plot_bar(ax)
         self.plot_xticks(nolabels=True)
         plt.ylabel(u"\N{DEGREE SIGN}C")
@@ -143,7 +132,10 @@ class NightShow():
         self.splplot(self.dates, self.data['tlab'],'b', label='lab')
         self.splplot(self.dates, self.data['toil1'],'c', label='oil1', smooth=1)
         self.splplot(self.dates, self.data['toil2'],'m', label='oil2', smooth=1)
-        ax.legend(loc=2, fontsize='small')
+        try:
+            ax.legend(loc=2, fontsize='small')
+        except TypeError:
+            ax.legend(loc=2)
         self.plot_bar(ax)
         self.plot_xticks()
         plt.ylabel(u"\N{DEGREE SIGN}C")
@@ -152,36 +144,52 @@ class NightShow():
         plt.close()
 
     def humidities(self):
+        """
+        plot the humidities
+        """
         ax = plt.subplot(1,1,1)
         plt.title('Humidities')
         plt.plot(self.dates, self.data['hbay'],'b', label='bay')
         plt.plot(self.dates, self.data['haussen'],'r', label='outside')
         plt.plot(self.dates, self.data['helectr'],'g', label='electr')
         plt.plot(self.dates, self.data['hspec'],'orange', label='spectr')
-        ax.legend(loc=2, fontsize='small')
+        try:
+            ax.legend(loc=2, fontsize='small')
+        except TypeError:
+            ax.legend(loc=2)
         plt.ylim(0,100)
         self.plot_rain(ax)
         self.plot_bar(ax)
         self.plot_xticks()
+        plt.grid()
         plt.ylabel('rel. %')
         plt.savefig('humidities.png')
         #plt.show()
         plt.close()
 
     def splplot(self, x, y, color, label='', smooth=0.5):
-        import scipy.interpolate as spyint
-        from astronomy import mjd, caldat
-        
-        mdates = np.array([mjd(d) for d in x])
-        sp = spyint.splrep(mdates, y, s=smooth)
-        x1 = np.linspace(mdates[0], mdates[-1], 288)
-        xdates = [caldat(xi) for xi in x1]
-        y1 = spyint.splev(x1, sp)
-
-        plt.plot(xdates, y1, color, label=label)
-        
+        """
+        plot a spline interpolated (smoothed) version of the data
+        """
+        try:
+            import scipy.interpolate as spyint
+        except ImportError:
+            plt.plot(x, y, color, label=label)
+        else:
+            from astronomy import mjd, caldat
+            
+            mdates = np.array([mjd(d) for d in x])
+            sp = spyint.splrep(mdates, y, s=smooth)
+            x1 = np.linspace(mdates[0], mdates[-1], 288)
+            xdates = [caldat(xi) for xi in x1]
+            y1 = spyint.splev(x1, sp)
+            plt.plot(xdates, y1, color, label=label)
 
     def pressure(self):
+        """
+        plot the pressure in mbar
+        calculate the pressure at sealevel corrected by temperature
+        """
         #from numpy import array,power
         #p0 = array(self.data['paussen'])/0.769584
         t0 = np.array(self.data['taussen'])+ 273.15 
@@ -195,6 +203,7 @@ class NightShow():
         plt.yticks(yticks,['%4.0f' % y for y in yticks])
         self.plot_bar(ax)
         self.plot_xticks()
+        plt.grid()
         plt.ylabel('mbar at sealevel')
         plt.savefig('pressure.png')
         #plt.show()
@@ -206,7 +215,10 @@ class NightShow():
         plt.plot(self.dates, self.data['wind'],'r', label='outside')
         plt.plot(self.dates, self.data['windbay'],'b', label='bay')
         plt.plot(self.dates, self.data['windpeak'],'#F75D59', label='peak')
-        ax.legend(loc=2,fontsize='small')
+        try:
+            ax.legend(loc=2, fontsize='small')
+        except TypeError:
+            ax.legend(loc=2)
         self.plot_bar(ax)
         self.plot_xticks()
         plt.ylabel('m/s')
@@ -214,6 +226,7 @@ class NightShow():
         #r = self.data['wind']
         #c = plt.scatter(theta, r)
         #c.set_alpha(0.75)
+        plt.grid()
         plt.savefig('winds.png')
         #plt.show()
         plt.close()
@@ -224,6 +237,7 @@ class NightShow():
         plt.semilogy(self.dates, self.data['lx'],'k')
         self.plot_bar(ax)
         self.plot_xticks()
+        plt.grid()
         plt.ylabel('lux')
         plt.savefig('brightness.png')
         #plt.show()
@@ -235,6 +249,7 @@ class NightShow():
         plt.semilogy(self.dates, self.data['dust'],'k', drawstyle='steps')
         self.plot_bar(ax)
         self.plot_xticks()
+        plt.grid()
         plt.ylabel('dust')
         plt.savefig('dust.png')
         #plt.show()

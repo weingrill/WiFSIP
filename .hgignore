@@ -3,3 +3,5 @@ syntax: glob
 .pydevproject
 src/*.pyc
 .settings/*
+src/*.png
+*.*~
