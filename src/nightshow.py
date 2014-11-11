@@ -246,7 +246,10 @@ class NightShow():
     def dust(self):
         ax = plt.subplot(1,1,1)
         plt.title('Dust')
-        plt.semilogy(self.dates, self.data['dust'],'k', drawstyle='steps')
+        if np.max(self.data['dust'])/np.min(self.data['dust'])>10.0:
+            plt.semilogy(self.dates, self.data['dust'],'k', drawstyle='steps')
+        else:
+            plt.plot(self.dates, self.data['dust'],'k', drawstyle='steps')
         self.plot_bar(ax)
         self.plot_xticks()
         plt.grid()
