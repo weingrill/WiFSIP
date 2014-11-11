@@ -88,7 +88,7 @@ class ObservationLog():
         cursor.execute(query)
         result = cursor.fetchall()
         self.objects = [r[0] for r in result]
-        query = """SELECT date, dateobs, exptime, object 
+        query = """SELECT date, dateobs, exptime, object, "FILTER" 
         from obs 
         where date>=current_timestamp-interval '1 day' 
         AND instrument=%d 
@@ -96,7 +96,7 @@ class ObservationLog():
         cursor.execute(query)
         result = cursor.fetchall()
         
-        columns = ['date', 'dateobs', 'exptime', 'object']
+        columns = ['date', 'dateobs', 'exptime', 'object', 'filter']
         
         self.data = {}
         for c in columns:
@@ -110,6 +110,14 @@ class ObservationLog():
         rcParams.update(params)
 
     def plot(self):
+        filters = {'V': 'g', 'B':'b', 'R': 'r', 'y': 'y', 
+                   'I':'#7F0000', 'U': '#6C2DC7', 'hbn':'c','hbw':'c',
+                   'han':'#A00000','haw':'#A00000',
+                   'rp':'#FF3030',
+                   'ThAr night': 'orange','ThAr day': 'orange',
+                   'ThAr bad weather': 'orange', 'Bias STELLA2':'b',
+                   'Flat Field long': 'g'}
+        
         plt.subplot(1,1,1)
         obj_pos = np.arange(len(self.objects))
         objarray = list(self.objects)
@@ -119,7 +127,16 @@ class ObservationLog():
             obj = self.data['object'][i]
             
             ypos = objarray.index(obj)
-            plt.barh(ypos, width, left=left, align='center')
+            cfilter = str(self.data['filter'][i]).rstrip()
+            if cfilter in filters:
+                filtercol = filters[cfilter]
+            elif obj in filters:
+                filtercol = filters[obj]
+            else:
+                print '"%s" "%s"' % (cfilter, obj)
+                filtercol= 'm'
+            
+            plt.barh(ypos, width, left=left, align='center', color=filtercol, edgecolor=filtercol)
         plt.yticks(obj_pos, self.objects)
         plt.xlabel('Performance')
         if self.instrument==1:
