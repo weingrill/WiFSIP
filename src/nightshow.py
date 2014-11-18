@@ -25,14 +25,17 @@ class NightShow():
 
         database = psycopg2.connect(database=database, user=user, host=host, password=password) 
         cursor = database.cursor()
-        query = "SELECT * from env where date>=current_timestamp-interval '1 day' order by date;" 
-        cursor.execute(query)
-        result = cursor.fetchall()
-        
         columns = [ 'date', 'tbay', 'tspec', 'telectr', 'ttable', 'taussen', 'hbay', \
                    'hspec', 'helectr', 'haussen', 'solz', 'paussen', 'wind' , \
                    'windpeak', 'winddir', 'windbay', 'lx',  'rain', 'good' , 'dust', \
                    'tlounge', 'tlab', 'toil1', 'toil2']
+        colstring = ', '.join(columns)
+        query = """SELECT %s 
+        FROM env 
+        WHERE date>=current_timestamp-interval '1 day' 
+        ORDER BY date;""" % colstring
+        cursor.execute(query)
+        result = cursor.fetchall()
         
         self.data = {}
         for c in columns:
