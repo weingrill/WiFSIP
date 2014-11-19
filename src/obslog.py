@@ -87,8 +87,14 @@ class ObservationLog():
             plt.title('Observation Log STELLA1')
         plt.subplots_adjust(top = 0.90,left=0.22, bottom=0.10,right=0.95)
         
-        start = self.data['dateobs'][0]
-        end = self.data['dateobs'][-1] + datetime.timedelta(hours=2)
+        try:
+            start = self.data['dateobs'][0]
+        except IndexError:
+            start = datetime.datetime.now() - datetime.timedelta(hours=12)
+        try:
+            end = self.data['dateobs'][-1] + datetime.timedelta(hours=2)
+        except IndexError:
+            end = datetime.datetime.now()
         hours = []
         labels = []
         start = start.replace(minute=0,second=0,microsecond=0)
