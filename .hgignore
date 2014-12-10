@@ -5,3 +5,6 @@ src/*.pyc
 .settings/*
 src/*.png
 *.*~
+
+syntax: regexp
+^src/WiFSIP_sensitivity\.pdf$
