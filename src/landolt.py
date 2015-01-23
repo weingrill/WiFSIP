@@ -16,6 +16,11 @@ class Landolt(object):
         '''
         Constructor
         '''
+        from datasource import DataSource
+    
+        self.table = DataSource(database='wifsip', user='sro', host='pina.aip.de')
+        self.data = []
+
     def fromfile(self, filename='table2.dat'):
         """
         load data from file
@@ -44,26 +49,57 @@ class Landolt(object):
         f = open(filename)
         lines = f.readlines()
         f.close
-        self.data = []
+        
         for l in lines:
             coords = l[12:38] 
             c = SkyCoord(coords, 'icrs', unit=(u.hourangle, u.deg))  # @UndefinedVariable
             record = {'name':   l[0:12].rstrip(),
                       'ra':   c.ra.degree,
                       'dec':  c.dec.degree,
-                      'Vmag': nfloat(l[38:45]),
-                      'B-V':  nfloat(l[46:51]),
-                      'U-B':  nfloat(l[52:59]),
-                      'V-R':  nfloat(l[59:66]),
-                      'R-I':  nfloat(l[66:73]),
-                      'V-I':  nfloat(l[73:79]),
-                      'Nobs': nint(l[80:83]),
-                      'Nnig': nint(l[84:87]),
-                         
+                      'vmag': nfloat(l[38:45]),
+                      'bv':  nfloat(l[46:51]),
+                      'ub':  nfloat(l[52:59]),
+                      'vr':  nfloat(l[59:66]),
+                      'ri':  nfloat(l[66:73]),
+                      'vi':  nfloat(l[73:79]),
+                      'nobs': nint(l[80:83]),
+                      'nnig': nint(l[84:87]),
+                      'e_vmag': nfloat(l[88:94]),
+                      'e_bv': nfloat(l[95:101]),
+                      'e_ub': nfloat(l[102:108]),
+                      'e_vr': nfloat(l[109:115]),
+                      'e_ri': nfloat(l[116:122]),
+                      'e_vi': nfloat(l[123:129]),
                       'coord': '(%f,%f)' % (c.ra.degree, c.dec.degree)}
-            print record
+            #print record
             self.data.append(record)
+            
+    def todatabase(self):
+        from StringIO import StringIO
+        
+        def nstr(s):
+            if len(str(s).strip())==0: return '\N'
+            elif type(s) is str: return str(s) 
+            else: return str(s)
+            
+        values = ''
+        
+        for record in self.data:
+            valline = '\t'.join([nstr(v) for v in record.values()])
+            valline = valline.replace('nan', '\N')
+            print valline
+            values += valline + '\n'
+
+        columns = record.keys()
+        f = StringIO(values)
+        cur = self.table.cursor
+        try:
+            cur.copy_from(f,'landolt', columns=columns)
+        finally:
+            self.table.commit()
+        
        
 if __name__ == '__main__':
     l = Landolt()
-    l.fromfile('/work1/jwe/Landolt/table2.dat')    
+    l.fromfile('/work1/jwe/Landolt/table2.dat') 
+    l.todatabase()   
