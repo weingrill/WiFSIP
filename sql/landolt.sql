@@ -16,6 +16,16 @@ CREATE TABLE landolt(
  e_vr real,
  e_ri real,
  e_vi real,
+ coord point,
  PRIMARY KEY (name)
 );
 
+
+select frames.objid, max(airmass) "airmass", count(star) "nstar", avg(mag_auto-vmag) "o-c mag", stddev_pop(mag_auto-vmag) "sigma"
+from frames, phot, landolt
+where object like 'Landolt%'
+and filter='V'
+and frames.objid=phot.objid
+and landolt.coord <@ circle(phot.coord,3./3600.)
+and frames.objid like '2015012%'
+group by frames.objid;
