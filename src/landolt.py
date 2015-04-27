@@ -75,6 +75,9 @@ class Landolt(object):
             self.data.append(record)
             
     def todatabase(self):
+        """
+        write the imported data to the database
+        """
         from StringIO import StringIO
         
         def nstr(s):
@@ -97,9 +100,40 @@ class Landolt(object):
             cur.copy_from(f,'landolt', columns=columns)
         finally:
             self.table.commit()
+    
+    def calibrate(self):
+        query = """SELECT frames.datesend, MAX(airmass) "airmass", COUNT(star) "nstar", AVG(mag_auto-vmag) "o-c mag", STDDEV_POP(mag_auto-vmag) "sigma"
+            FROM frames, phot, landolt
+            WHERE object LIKE 'Landolt%'
+            AND filter='V'
+            AND frames.objid=phot.objid
+            AND circle(phot.coord,3./3600.) @> circle(landolt.coord,0)
+            AND frames.objid like '2014%'
+            AND phot.flags=0
+            GROUP BY frames.datesend
+            ORDER BY frames.datesend;"""
+        result = self.table.query(query)
+
+        import numpy as np
+        for r in result: print '%s %.2f %2d %+6.3f %.3f' % r
         
+        import matplotlib.pyplot as plt
+        x = np.array([r[0] for r in result])
+        n = np.array([r[2] for r in result])
+        y = np.array([r[3] for r in result])
+        yerr = np.array([r[4] for r in result])
+        
+        #print len(x),len(y),len(yerr)
+        plt.scatter(y,yerr, s=n*5, edgecolor='none')
+        plt.show()
+        plt.errorbar(x, y, yerr)
+        plt.minorticks_on()
+        plt.grid()
+        plt.show()
+       
        
 if __name__ == '__main__':
     l = Landolt()
-    l.fromfile('/work1/jwe/Landolt/table2.dat') 
-    l.todatabase()   
+    #l.fromfile('/work1/jwe/Landolt/table2.dat') 
+    #l.todatabase()
+    l.calibrate()   
