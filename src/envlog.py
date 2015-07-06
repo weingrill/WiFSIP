@@ -9,7 +9,7 @@ import datetime
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
-import numpy as np
+#import numpy as np
 
 class EnvironmentLog():
     def __init__(self, instrument=1):
@@ -28,19 +28,20 @@ class EnvironmentLog():
         colstring = ', '.join(columns)
         query = """SELECT %s 
         FROM obs 
-        WHERE instrument=%d 
+        WHERE instrument=%d
+        and dateobs>=current_timestamp-interval '1 day'  
         ORDER BY date 
         LIMIT 288;""" % (colstring, instrument) 
         cursor.execute(query)
         result = cursor.fetchall()
-        #where date>=current_timestamp-interval '1 day' 
+        #
         
         
         self.data = {}
         for c in columns:
             i = columns.index(c)
             self.data[c] = [r[i] for r in result]
-            
+        
         self.dates = self.data['date']
         from matplotlib import rcParams
         params = {'backend': 'Agg',
@@ -69,17 +70,15 @@ class EnvironmentLog():
             plt.xlabel('time')
 
 
-    def plot(self):
+    def envplot(self):
         """
-        plot the humidities
+        plot the mirror temperatures
         """
         ax = plt.subplot(1,1,1)
-        plt.title('Humidities')
+        plt.title('Temperatures')
         plt.plot(self.dates, self.data['tempm1'],'b', label='tempm1')
         plt.plot(self.dates, self.data['tempm2'],'g', label='tempm2')
         plt.plot(self.dates, self.data['dewpoint'],'r', label='dewpoint')
-        plt.scatter(self.dates, self.data['dettemp'], label='dettemp', facecolor='m', edgecolor='none')
-        plt.scatter(self.dates, self.data['cryotemp'], label='cryotemp', facecolor='c', edgecolor='none')
         try:
             ax.legend(loc=2, fontsize='small')
         except TypeError:
@@ -91,6 +90,27 @@ class EnvironmentLog():
         #plt.show()
         plt.close()
 
+    def camplot(self):
+        """
+        plot the humidities
+        """
+        ax = plt.subplot(1,1,1)
+        plt.title('WiFSIP Dewar Temperatures')
+        plt.scatter(self.dates, self.data['dettemp'], label='dettemp', facecolor='m', edgecolor='none')
+        plt.scatter(self.dates, self.data['cryotemp'], label='cryotemp', facecolor='c', edgecolor='none')
+        try:
+            ax.legend(loc=2, fontsize='small')
+        except TypeError:
+            ax.legend(loc=2)
+        self.plot_xticks()
+        plt.grid()
+        plt.ylabel('C')
+        plt.savefig('detcryotemp.png')
+        #plt.show()
+        plt.close()
+
+
 if __name__ == '__main__':
     envlog2 = EnvironmentLog(2)
-    envlog2.plot()
+    envlog2.envplot()
+    envlog2.camplot()
