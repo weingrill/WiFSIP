@@ -18,7 +18,7 @@ class Landolt(object):
         '''
         from datasource import DataSource
     
-        self.table = DataSource(database='wifsip', user='sro', host='pina.aip.de')
+        self.table = DataSource(database='stella', user='stella', host='pera.aip.de')
         self.data = []
 
     def fromfile(self, filename='table2.dat'):
