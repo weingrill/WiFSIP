@@ -24,93 +24,87 @@ class EnvironmentLog():
                                     host=host, 
                                     password=password) 
         cursor = database.cursor()
-        columns = ['date', 'dateobs', 'tempm1', 'tempm2', 'dewpoint','cryotemp', 'dettemp']
+        columns = ['pressure', 'dettemp','cryotemp', 'telfocus', 'ambtemp', 'relhum', 'maxwind', 'tempm1', 'tempm2', 'avrgwind','atmpress', 'dewpoint']
         colstring = ', '.join(columns)
         query = """SELECT %s 
         FROM obs 
         WHERE instrument=%d
-        and dateobs>=current_timestamp-interval '1 day'  
-        ORDER BY date 
-        LIMIT 288;""" % (colstring, instrument) 
+        ORDER BY date DESC 
+        LIMIT 1;""" % (colstring, instrument) 
         cursor.execute(query)
         result = cursor.fetchall()
-        #
-        
         
         self.data = {}
-        for c in columns:
-            i = columns.index(c)
-            self.data[c] = [r[i] for r in result]
         
-        self.dates = self.data['date']
+        for i, c in enumerate(columns):
+            self.data[c] = result[0][i]
+        
+        self.data['pressure'] *= 1e7
+        
         from matplotlib import rcParams
         params = {'backend': 'Agg',
               'savefig.dpi' : 100,
-              'figure.figsize': [9.6, 6]}
+              'figure.figsize': [6, 6]}
         rcParams.update(params)
+        print self.data['dettemp']
 
-    def plot_xticks(self, nolabels=False):
-        """
-        plot the xticks every two hours (08h 10h 12h)
-        """
-        start = self.data['date'][0]
-        end = self.data['date'][-1]
-        hours = []
-        labels = []
-        start = start.replace(minute=0,second=0,microsecond=0)
-        current = start + datetime.timedelta(hours=1)
-        while current<end:
-            hours.append(current)
-            labels.append('%02dh' % current.hour)
-            current += datetime.timedelta(hours=2)
-        if nolabels: 
-            plt.xticks(hours,'')
+    def plot(self, value):
+        from gauge import gauge
+        unit = ''
+        if value in ['dettemp','cryotemp', 'ambtemp', 'tempm1', 'tempm2', 'dewpoint']:
+            unit = u"\N{DEGREE SIGN}C"
+        if value == 'telfocus': unit = 'mm'
+        if value in ['maxwind', 'avrgwind']:
+            unit = 'm/s'
+        if value == 'atmpress': unit = 'mBar'
+        if value == 'relhum': unit = '%'
+        if value == 'pressure': unit = '1e-7 bar'
+        titles = {'pressure': 'pressure', 
+                  'dettemp': 'det. temp.',
+                  'cryotemp': 'cryo temp.', 
+                  'telfocus': 'focus', 
+                  'ambtemp': 'amb. temp.', 
+                  'relhum': 'rel. hum.', 
+                  'maxwind': 'max. wind', 
+                  'tempm1': 'M1 temp.', 
+                  'tempm2': 'M2 temp.', 
+                  'avrgwind': 'wind speed',
+                  'atmpress': 'atm. press.', 
+                  'dewpoint': 'dewpoint'}
+        minmaxes = {'pressure': [0.0, 100.0], 
+                  'dettemp': [-120.0, -80.0],
+                  'cryotemp': [-160.0, -130.0], 
+                  'telfocus': [0.0, 80.0], 
+                  'ambtemp':[-10.0, 30.0], 
+                  'relhum': [0.0, 100.0], 
+                  'maxwind': [0.0, 20.0], 
+                  'tempm1': [-10.0, 30.0], 
+                  'tempm2':   [-10.0, 30.0], 
+                  'avrgwind': [0.0, 20.0],
+                  'atmpress': [750.0, 780.0], 
+                  'dewpoint': [-10.0, 30.0]}
+        
+        if value in minmaxes:
+            minmax = minmaxes[value]
         else:
-            plt.xticks(hours, labels)
-            plt.xlabel('time')
-
-
-    def envplot(self):
-        """
-        plot the mirror temperatures
-        """
-        ax = plt.subplot(1,1,1)
-        plt.title('Temperatures')
-        plt.plot(self.dates, self.data['tempm1'],'b', label='tempm1')
-        plt.plot(self.dates, self.data['tempm2'],'g', label='tempm2')
-        plt.plot(self.dates, self.data['dewpoint'],'r', label='dewpoint')
-        try:
-            ax.legend(loc=2, fontsize='small')
-        except TypeError:
-            ax.legend(loc=2)
-        self.plot_xticks()
-        plt.grid()
-        plt.ylabel('C')
-        plt.savefig('tempm1.png')
-        #plt.show()
-        plt.close()
-
-    def camplot(self):
-        """
-        plot the humidities
-        """
-        ax = plt.subplot(1,1,1)
-        plt.title('WiFSIP Dewar Temperatures')
-        plt.scatter(self.dates, self.data['dettemp'], label='dettemp', facecolor='m', edgecolor='none')
-        plt.scatter(self.dates, self.data['cryotemp'], label='cryotemp', facecolor='c', edgecolor='none')
-        try:
-            ax.legend(loc=2, fontsize='small')
-        except TypeError:
-            ax.legend(loc=2)
-        self.plot_xticks()
-        plt.grid()
-        plt.ylabel('C')
-        plt.savefig('detcryotemp.png')
-        #plt.show()
-        plt.close()
-
+            minmax = [0.0, 100.0]
+        nticks = {'pressure': 10, 
+                  'dettemp': 4,
+                  'cryotemp': 3, 
+                  'telfocus': 8, 
+                  'ambtemp': 4, 
+                  'relhum': 10, 
+                  'maxwind': 2, 
+                  'tempm1': 4, 
+                  'tempm2': 4, 
+                  'avrgwind': 2,
+                  'atmpress': 3, 
+                  'dewpoint': 4}
+        filename = '%s_%d.png' % (value, self.instrument)
+        gauge(self.data[value], minmax=minmax, nticks=nticks[value],title=titles[value], units=unit, filename = filename)
 
 if __name__ == '__main__':
     envlog2 = EnvironmentLog(2)
-    envlog2.envplot()
-    envlog2.camplot()
+    for value in ['pressure', 'dettemp','cryotemp', 'telfocus', 'ambtemp', 'relhum', 'maxwind', 'tempm1', 'tempm2', 'avrgwind','atmpress', 'dewpoint']:
+        envlog2.plot(value)
+    
