@@ -5,11 +5,8 @@ Created on Nov 18, 2014
 @author: jwe
 '''
 import psycopg2
-import datetime
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pylab as plt
-#import numpy as np
 
 class EnvironmentLog():
     def __init__(self, instrument=1):
@@ -29,7 +26,7 @@ class EnvironmentLog():
         query = """SELECT %s 
         FROM obs 
         WHERE instrument=%d
-        ORDER BY date DESC 
+        ORDER BY dateobs DESC 
         LIMIT 1;""" % (colstring, instrument) 
         cursor.execute(query)
         result = cursor.fetchall()
@@ -46,7 +43,6 @@ class EnvironmentLog():
               'savefig.dpi' : 100,
               'figure.figsize': [6, 6]}
         rcParams.update(params)
-        print self.data['dettemp']
 
     def plot(self, value):
         from gauge import gauge
@@ -72,31 +68,31 @@ class EnvironmentLog():
                   'atmpress': 'atm. press.', 
                   'dewpoint': 'dewpoint'}
         minmaxes = {'pressure': [0.0, 100.0], 
-                  'dettemp': [-120.0, -80.0],
+                  'dettemp': [-120.0, -100.0],
                   'cryotemp': [-160.0, -130.0], 
-                  'telfocus': [0.0, 80.0], 
+                  'telfocus': [40.0, 50.0], 
                   'ambtemp':[-10.0, 30.0], 
                   'relhum': [0.0, 100.0], 
                   'maxwind': [0.0, 20.0], 
-                  'tempm1': [-10.0, 30.0], 
-                  'tempm2':   [-10.0, 30.0], 
+                  'tempm1': [0.0, 25.0], 
+                  'tempm2':   [0.0, 25.0], 
                   'avrgwind': [0.0, 20.0],
                   'atmpress': [750.0, 780.0], 
-                  'dewpoint': [-10.0, 30.0]}
+                  'dewpoint': [-30.0, 10.0]}
         
         if value in minmaxes:
             minmax = minmaxes[value]
         else:
             minmax = [0.0, 100.0]
         nticks = {'pressure': 10, 
-                  'dettemp': 4,
+                  'dettemp': 2,
                   'cryotemp': 3, 
-                  'telfocus': 8, 
+                  'telfocus': 10, 
                   'ambtemp': 4, 
                   'relhum': 10, 
                   'maxwind': 2, 
-                  'tempm1': 4, 
-                  'tempm2': 4, 
+                  'tempm1': 5, 
+                  'tempm2': 5, 
                   'avrgwind': 2,
                   'atmpress': 3, 
                   'dewpoint': 4}
