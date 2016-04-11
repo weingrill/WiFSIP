@@ -96,8 +96,28 @@ class EnvironmentLog():
                   'avrgwind': 2,
                   'atmpress': 3, 
                   'dewpoint': 4}
+        
+        ranges = {'pressure': [{'color': 'g', 'from': 14.0, 'to': 44.0},
+                               {'color': 'y', 'from': 44.0, 'to': 64.0}], 
+                  'dettemp':  [{'color': 'g', 'from': -113.2, 'to': -112.0}],
+                  'cryotemp': [{'color': 'g', 'from': -148.0, 'to': -141.0}], 
+                  'telfocus': [{'color': 'g', 'from': 43.6, 'to': 43.88}], 
+                  'ambtemp':  {}, 
+                  'relhum':   [{'color': 'g', 'from': 0.0, 'to': 35.0},
+                               {'color': 'y', 'from': 35.0, 'to': 78.0}], 
+                  'maxwind':  [{'color': 'g', 'from': 0.0, 'to': 7.2},
+                               {'color': 'y', 'from': 7.2, 'to': 9.53}],
+                  'tempm1':   {},
+                  'tempm2':   {},
+                  'avrgwind': [{'color': 'g', 'from': 0.0, 'to': 5.4},
+                               {'color': 'y', 'from': 5.4, 'to': 6.4}],
+                  'atmpress': [{'color': 'y', 'from': 758.5, 'to': 762.0},
+                               {'color': 'g', 'from': 762.0, 'to': 774.5}], 
+                  'dewpoint': [{'color': 'g', 'from': -30.0, 'to': 2.0},
+                               {'color': 'y', 'from': 2.0, 'to': 6.2}]
+                  }
         filename = '%s_%d.png' % (value, self.instrument)
-        gauge(self.data[value], minmax=minmax, nticks=nticks[value],title=titles[value], units=unit, filename = filename)
+        gauge(self.data[value], minmax=minmax, nticks=nticks[value],title=titles[value], units=unit, filename = filename, ranges = ranges[value])
 
 if __name__ == '__main__':
     envlog2 = EnvironmentLog(2)

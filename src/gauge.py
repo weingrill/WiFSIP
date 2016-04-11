@@ -8,7 +8,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-from matplotlib.patches import Circle, Arc
+from matplotlib.patches import Circle, Wedge
 
 def degree_range(n): 
     start = np.linspace(0,270,n+1, endpoint=True)[0:-1]
@@ -29,17 +29,25 @@ def deg(pos, minmax):
     return scaleto(pos, minmax, [225.0, -45.0])
     #return 225 - 270.0*(pos-minmax[0])/minmax[1]
 
-def gauge(position=0.0, minmax=[0.0, 100.0], nticks=10, units='[1]', title='value',filename = None):
+def gauge(position=0.0, minmax=[0.0, 100.0], nticks=10, units='[1]', title='value',filename = None, ranges=None):
     #from matplotlib import rcParams
     #params = {'backend': 'Agg',
     #      'savefig.dpi' : 100,
     #      'figure.figsize': [6, 6]}
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     #rcParams.update(params)
+    # plot the outer circle
     ax.add_patch(Circle((0, 0), radius=0.5, edgecolor='k', facecolor='w'))
-    ax.add_patch(Arc((0, 0), 0.9, 0.9, angle=-45.0, theta1=0.0, theta2=270.0))
     
+    # plot the inner arc
+    #ax.add_patch(Arc((0, 0), 0.9, 0.9, angle=-45.0, theta1=0.0, theta2=270.0))
+    
+    #plot range wedges
+    for r in ranges:
+        theta1 = deg(r['to'], minmax)
+        theta2 = deg(r['from'], minmax)
+        ax.add_patch(Wedge((0, 0), 0.5, theta1, theta2, width=0.05, alpha=0.4, color=r['color']))
     position = max(minmax[0],position)
     position = min(minmax[1],position)
     pos = deg(position, minmax)
@@ -54,9 +62,11 @@ def gauge(position=0.0, minmax=[0.0, 100.0], nticks=10, units='[1]', title='valu
         c = np.cos(np.radians(tickpos))
         s = np.sin(np.radians(tickpos))
         if i % 5 <> 0 and i % 10 <> 0:
-            ax.plot([0.45*c, 0.475*c], [0.45*s, 0.475*s],'k')
+            ax.plot([0.48*c, 0.5*c], [0.48*s, 0.5*s],'k')
+        # plot 5 ticks    
         if i % 5 == 0 and i % 10 <> 0:
-            ax.plot([0.45*c, 0.4875*c], [0.45*s, 0.4875*s],'k')
+            ax.plot([0.46*c, 0.5*c], [0.46*s, 0.5*s],'k')
+            
         if i % 10 == 0:
             ax.plot([0.45*c, 0.5*c], [0.45*s, 0.5*s],'k', linewidth=2)
             ax.text(0.4*c, 0.4*s,ticklabels[i/10], ha='center', va='center', fontsize=14)
@@ -97,5 +107,5 @@ def gauge(position=0.0, minmax=[0.0, 100.0], nticks=10, units='[1]', title='valu
 
         
 if __name__ == '__main__':
-    gauge(-135.964, minmax=[-160,-130.0],nticks=3,title='Cryo Temp', units=u"\N{DEGREE SIGN}C")
+    gauge(-135.964, minmax=[-160,-130.0],nticks=3,title='Cryo Temp', units=u"\N{DEGREE SIGN}C", ranges=[{'color':'g', 'from':-140, 'to':-145}])
     #gauge(-155.64, minmax=[-130.0,-80.0])
