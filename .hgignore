@@ -8,3 +8,5 @@ src/*.png
 
 syntax: regexp
 ^src/WiFSIP_sensitivity\.pdf$
+syntax: regexp
+\.png$

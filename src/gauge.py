@@ -77,9 +77,9 @@ def gauge(position=0.0, minmax=[0.0, 100.0], nticks=10, units='[1]', title='valu
     """
     pinlength = 0.35 # plus headlength of 0.1 gives 0.45
     ax.arrow(0, 0, pinlength * np.cos(np.radians(pos)), pinlength * np.sin(np.radians(pos)), \
-                 width=0.04, head_width=0.04, head_length=0.1, fc='r', ec='r')
+                 width=0.04, head_width=0.04, head_length=0.1, fc='orange', ec='orange')
     
-    ax.add_patch(Circle((0, 0), radius=0.02, facecolor='r'))
+    ax.add_patch(Circle((0, 0), radius=0.02, facecolor='orange'))
     
     
     ax.add_patch(Circle((0, 0), radius=0.01, facecolor='k', zorder=11))
