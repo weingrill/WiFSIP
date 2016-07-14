@@ -13,17 +13,17 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import numpy as np
+import config
+import os
 
 class NightShow():
     def __init__(self):
         """
+        get the values for the last 24 hours from the database
         """
-        database  = 'stella'
-        user = 'guest'
-        host = 'pera.aip.de'
-        password='IwmDs!'
-
-        database = psycopg2.connect(database=database, user=user, host=host, password=password) 
+        
+        database = psycopg2.connect(database=config.dbname, user=config.dbuser, host=config.dbhost, password=config.dbpassword) 
+        self.plotpath = config.plotpath
         cursor = database.cursor()
         columns = [ 'date', 'tbay', 'tspec', 'telectr', 'ttable', 'taussen', 'hbay', \
                    'hspec', 'helectr', 'haussen', 'solz', 'paussen', 'wind' , \
@@ -53,7 +53,7 @@ class NightShow():
      
     def plot_bar(self, axis):
         """
-        plot agreen vertical bar for every five minute where the conditions are 
+        plot a green vertical bar for every five minute where the conditions are 
         good
         """
         
@@ -68,11 +68,11 @@ class NightShow():
 
     def plot_rain(self, axis):
         """
-        plot agreen vertical bar for every five minute where the conditions are 
+        plot a green vertical bar for every five minute where the conditions are 
         good
         """
         
-        # width of the bar is 5 minutes (= datainterval)
+        # width of the bar is 5 minutes (= data interval)
         barwidth = 5.0/(24*60)
         raindates=[]
         for i in range(len(self.dates)):
@@ -142,8 +142,7 @@ class NightShow():
         self.plot_bar(ax)
         self.plot_xticks()
         plt.ylabel(u"\N{DEGREE SIGN}C")
-        plt.savefig('temperatures.png')
-        #plt.show()
+        plt.savefig(os.path.join(self.plotpath,'temperatures.png'))
         plt.close()
 
     def humidities(self):
@@ -166,8 +165,7 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('rel. %')
-        plt.savefig('humidities.png')
-        #plt.show()
+        plt.savefig(os.path.join(self.plotpath,'humidities.png'))
         plt.close()
 
     def splplot(self, x, y, color, label='', smooth=0.5):
@@ -208,8 +206,7 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('mbar at sealevel')
-        plt.savefig('pressure.png')
-        #plt.show()
+        plt.savefig(os.path.join(self.plotpath,'pressure.png'))
         plt.close()
 
     def winds(self):
@@ -230,20 +227,21 @@ class NightShow():
         #c = plt.scatter(theta, r)
         #c.set_alpha(0.75)
         plt.grid()
-        plt.savefig('winds.png')
-        #plt.show()
+        plt.savefig(os.path.join(self.plotpath,'winds.png'))
         plt.close()
 
     def brightness(self):
         ax = plt.subplot(1,1,1)
         plt.title('Brightness')
-        plt.semilogy(self.dates, self.data['lx'],'k')
+        if np.max(self.data['lx']<0):
+            plt.semilogy(self.dates, self.data['lx'],'k')
+        else:
+            plt.plot(self.dates, self.data['lx'],'k')
         self.plot_bar(ax)
         self.plot_xticks()
         plt.grid()
         plt.ylabel('lux')
-        plt.savefig('brightness.png')
-        #plt.show()
+        plt.savefig(os.path.join(self.plotpath,'brightness.png'))
         plt.close()
 
     def dust(self):
@@ -257,14 +255,41 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('dust')
-        plt.savefig('dust.png')
-        #plt.show()
+        plt.savefig(os.path.join(self.plotpath,'dust.png'))
         plt.close()
 
-nightshow = NightShow()
-nightshow.temperatures()
-nightshow.humidities()
-nightshow.pressure()
-nightshow.brightness()
-nightshow.dust()
-nightshow.winds()
+def removefile(filename):
+    try:
+        os.remove(filename)
+    except OSError:
+        # can't remove file
+        print("Can't remove %s" % filename)
+    return
+
+if __name__ == '__main__':
+    nightshow = NightShow()
+    try:
+        nightshow.temperatures()
+    except:
+        removefile('temperatures.png')
+    try:
+        nightshow.humidities()
+    except:
+        removefile('humidities.png')
+    try:
+        nightshow.pressure()
+    except ValueError:
+        removefile('pressure.png')
+    try:
+        nightshow.brightness()
+    except ValueError:
+        removefile('brightness.png')
+    try:
+        nightshow.dust()
+    except ValueError:
+        removefile('dust.png')
+    try:
+        nightshow.winds()
+    except ValueError:
+        removefile('winds.png')
+    

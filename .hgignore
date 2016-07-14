@@ -10,3 +10,5 @@ syntax: regexp
 ^src/WiFSIP_sensitivity\.pdf$
 syntax: regexp
 \.png$
+syntax: regexp
+^src/config\.py$

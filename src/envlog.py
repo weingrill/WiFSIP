@@ -9,13 +9,14 @@ import matplotlib
 matplotlib.use('Agg')
 
 class EnvironmentLog():
-    def __init__(self, instrument=1):
+    def __init__(self, instrument=1, devel = False):
         database  = 'stella'
         user = 'guest'
         host = 'pera.aip.de'
         password='IwmDs!'
         
-        self.instrument = instrument
+        self.instrument = int(instrument)
+        self.devel = devel
         database = psycopg2.connect(database=database, 
                                     user=user, 
                                     host=host, 
@@ -70,7 +71,7 @@ class EnvironmentLog():
         minmaxes = {'pressure': [0.0, 100.0], 
                   'dettemp': [-120.0, -100.0],
                   'cryotemp': [-160.0, -130.0], 
-                  'telfocus': [40.0, 50.0], 
+                  'telfocus': [43.0, 45.0], 
                   'ambtemp':[-10.0, 30.0], 
                   'relhum': [0.0, 100.0], 
                   'maxwind': [0.0, 20.0], 
@@ -84,15 +85,15 @@ class EnvironmentLog():
             minmax = minmaxes[value]
         else:
             minmax = [0.0, 100.0]
-        nticks = {'pressure': 10, 
-                  'dettemp': 2,
+        nticks = {'pressure':10, 
+                  'dettemp':  2,
                   'cryotemp': 3, 
-                  'telfocus': 10, 
-                  'ambtemp': 4, 
-                  'relhum': 10, 
-                  'maxwind': 2, 
-                  'tempm1': 5, 
-                  'tempm2': 5, 
+                  'telfocus':10, 
+                  'ambtemp':  4, 
+                  'relhum':  10, 
+                  'maxwind':  2, 
+                  'tempm1':   5, 
+                  'tempm2':   5, 
                   'avrgwind': 2,
                   'atmpress': 3, 
                   'dewpoint': 4}
@@ -116,11 +117,22 @@ class EnvironmentLog():
                   'dewpoint': [{'color': 'g', 'from': -30.0, 'to': 2.0},
                                {'color': 'y', 'from': 2.0,   'to': 6.2}]
                   }
-        filename = '%s_%d.png' % (value, self.instrument)
+        if self.devel:
+            filename = '../www/%s_%d.png' % (value, self.instrument)
+        else:
+            filename = '%s_%d.png' % (value, self.instrument)
         gauge(self.data[value], minmax=minmax, nticks=nticks[value],title=titles[value], units=unit, filename = filename, ranges = ranges[value])
 
 if __name__ == '__main__':
-    envlog2 = EnvironmentLog(2)
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='produces gauges for the STELLA web gui')
+    parser.add_argument('-devel', action='store_true', default=False, help='use development path')
+    parser.add_argument('instrument', type = int, default=2, help='1 = SES, 2 = WiFSIP')
+    
+    args = parser.parse_args()
+
+    envlog = EnvironmentLog(args.instrument, devel = args.devel)
     for value in ['pressure', 'dettemp','cryotemp', 'telfocus', 'ambtemp', 'relhum', 'maxwind', 'tempm1', 'tempm2', 'avrgwind','atmpress', 'dewpoint']:
-        envlog2.plot(value)
+        envlog.plot(value)
     
