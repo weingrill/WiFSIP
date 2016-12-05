@@ -37,7 +37,7 @@ class EnvironmentLog():
         for i, c in enumerate(columns):
             self.data[c] = result[0][i]
         
-        self.data['pressure'] *= 1e7
+        self.data['pressure'] *= 1e6
         
         from matplotlib import rcParams
         params = {'backend': 'Agg',
@@ -55,7 +55,7 @@ class EnvironmentLog():
             unit = 'm/s'
         if value == 'atmpress': unit = 'mBar'
         if value == 'relhum': unit = '%'
-        if value == 'pressure': unit = '1e-7 bar'
+        if value == 'pressure': unit = '1e-6 bar'
         titles = {'pressure': 'pressure', 
                   'dettemp': 'det. temp.',
                   'cryotemp': 'cryo temp.', 
@@ -68,7 +68,7 @@ class EnvironmentLog():
                   'avrgwind': 'wind speed',
                   'atmpress': 'atm. press.', 
                   'dewpoint': 'dewpoint'}
-        minmaxes = {'pressure': [0.0, 100.0], 
+        minmaxes = {'pressure': [0.0, 10.0], 
                   'dettemp': [-120.0, -100.0],
                   'cryotemp': [-160.0, -130.0], 
                   'telfocus': [43.0, 45.0], 
@@ -98,8 +98,8 @@ class EnvironmentLog():
                   'atmpress': 3, 
                   'dewpoint': 4}
         
-        ranges = {'pressure': [{'color': 'g', 'from': 14.0, 'to': 44.0},
-                               {'color': 'y', 'from': 44.0, 'to': 64.0}], 
+        ranges = {'pressure': [{'color': 'g', 'from': 1.4, 'to': 4.40},
+                               {'color': 'y', 'from': 4.4, 'to': 6.40}], 
                   'dettemp':  [{'color': 'g', 'from': -113.2, 'to': -112.0}],
                   'cryotemp': [{'color': 'g', 'from': -148.0, 'to': -141.0}], 
                   'telfocus': [{'color': 'g', 'from': 43.6, 'to': 43.88}], 
