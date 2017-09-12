@@ -51,7 +51,7 @@ axes.formatter.limits : -3, 3 # use scientific notation if log10
 #axes3d.grid         : True    # display grid on 3d axes
 
 
-axes.color_cycle: FF9900, CC99CC, 9999CC, CC6666, FFCC99, 9999FF, FF9966, CC6699
+axes.prop_cycle: cycler('color', ['ff9900', 'cc99cc', '9999cc', 'cc6666', 'ffcc99', '9999ff', 'ff9966', 'cc6699'])
                    # FF9900 : orange
                    # CC99CC : velvet
                    # 9999CC : gray blue

@@ -26,7 +26,7 @@ class WiFSIPPressure():
         cursor = database.cursor()
         query = "SELECT datemeas, mbar, temp0, temp1, temp2, temp3 " \
                 " FROM wifsippressure" \
-                " WHERE datemeas>=current_timestamp-interval '1 day'" \
+                " WHERE datemeas>=(SELECT MAX(datemeas) FROM wifsippressure)-interval '1 day'" \
                 " ORDER BY datemeas;"
         cursor.execute(query)
         result = cursor.fetchall()
@@ -34,13 +34,14 @@ class WiFSIPPressure():
         for i, c in enumerate(['datemeas', 'mbar', 'temp0', 'temp1', 'temp2', 'temp3']):
             self.data[c] = [r[i] for r in result]
         self.dates = self.data['datemeas']
+        
     
     def plotpressure(self):
         import matplotlib.pylab as plt
         import matplotlib.dates as mdates
         
         plt.style.use('lcars.mplstyle')
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         
         ax.plot(self.dates, self.data['mbar'])
 
@@ -54,10 +55,10 @@ class WiFSIPPressure():
         ax.grid()
         ax.minorticks_on()
         
-        ax.set_xlabel('time')
+        ax.set_xlabel('time '+ str(lastdate))
         plt.ylabel('pressure [mbar]')
         ax.set_title('WiFSIP dewar pressure')
-        plt.savefig(os.path.join(self.plotpath,'wifsippressure.png'))
+        plt.savefig(os.path.join(self.plotpath,'wifsippressure.svg'))
         #plt.show()
         
     def plottemperatures(self):
@@ -65,7 +66,7 @@ class WiFSIPPressure():
         import matplotlib.dates as mdates
         
         plt.style.use('lcars.mplstyle')
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         
         ax.plot(self.dates, self.data['temp0'], label='temp0')
         ax.plot(self.dates, self.data['temp1'], label='temp1')
@@ -93,10 +94,10 @@ class WiFSIPPressure():
         ax.grid()
         ax.minorticks_on()
         
-        ax.set_xlabel('time')
+        ax.set_xlabel('time'+ str(lastdate))
         plt.ylabel(u"temperature \N{DEGREE SIGN}C")
         ax.set_title('WiFSIP temperatures')
-        plt.savefig(os.path.join(self.plotpath,'wifsiptemperatures.png'))
+        plt.savefig(os.path.join(self.plotpath,'wifsiptemperatures.svg'))
         #plt.show()
         
 

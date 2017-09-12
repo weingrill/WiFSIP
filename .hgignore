@@ -12,3 +12,5 @@ syntax: regexp
 \.png$
 syntax: regexp
 ^src/config\.py$
+syntax: regexp
+\.svg$

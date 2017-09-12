@@ -6,21 +6,18 @@ Created on Nov 18, 2014
 '''
 import psycopg2
 import matplotlib
+import config
 matplotlib.use('Agg')
 
 class EnvironmentLog():
     def __init__(self, instrument=1, devel = False):
-        database  = 'stella'
-        user = 'guest'
-        host = 'pera.aip.de'
-        password='IwmDs!'
         
         self.instrument = int(instrument)
         self.devel = devel
-        database = psycopg2.connect(database=database, 
-                                    user=user, 
-                                    host=host, 
-                                    password=password) 
+        database = psycopg2.connect(database=config.dbname, 
+                                    user=config.dbuser, 
+                                    host=config.dbhost, 
+                                    password=config.dbpassword) 
         cursor = database.cursor()
         columns = ['pressure', 'dettemp','cryotemp', 'telfocus', 'ambtemp', 'relhum', 'maxwind', 'tempm1', 'tempm2', 'avrgwind','atmpress', 'dewpoint']
         colstring = ', '.join(columns)
@@ -118,9 +115,9 @@ class EnvironmentLog():
                                {'color': 'y', 'from': 2.0,   'to': 6.2}]
                   }
         if self.devel:
-            filename = '../www/%s_%d.png' % (value, self.instrument)
+            filename = '../www/%s_%d.svg' % (value, self.instrument)
         else:
-            filename = '%s_%d.png' % (value, self.instrument)
+            filename = '%s_%d.svg' % (value, self.instrument)
         gauge(self.data[value], minmax=minmax, nticks=nticks[value],title=titles[value], units=unit, filename = filename, ranges = ranges[value])
 
 if __name__ == '__main__':

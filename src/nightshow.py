@@ -100,7 +100,7 @@ class NightShow():
             plt.xticks(hours,'')
         else:
             plt.xticks(hours, labels)
-            plt.xlabel('time')
+            plt.xlabel('time '+str(end))
     
     def temperatures(self):
         """
@@ -142,7 +142,7 @@ class NightShow():
         self.plot_bar(ax)
         self.plot_xticks()
         plt.ylabel(u"\N{DEGREE SIGN}C")
-        plt.savefig(os.path.join(self.plotpath,'temperatures.png'))
+        plt.savefig(os.path.join(self.plotpath,'temperatures.svg'))
         plt.close()
 
     def humidities(self):
@@ -165,7 +165,7 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('rel. %')
-        plt.savefig(os.path.join(self.plotpath,'humidities.png'))
+        plt.savefig(os.path.join(self.plotpath,'humidities.svg'))
         plt.close()
 
     def splplot(self, x, y, color, label='', smooth=0.5):
@@ -206,7 +206,7 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('mbar at sealevel')
-        plt.savefig(os.path.join(self.plotpath,'pressure.png'))
+        plt.savefig(os.path.join(self.plotpath,'pressure.svg'))
         plt.close()
 
     def winds(self):
@@ -227,7 +227,7 @@ class NightShow():
         #c = plt.scatter(theta, r)
         #c.set_alpha(0.75)
         plt.grid()
-        plt.savefig(os.path.join(self.plotpath,'winds.png'))
+        plt.savefig(os.path.join(self.plotpath,'winds.svg'))
         plt.close()
 
     def brightness(self):
@@ -241,7 +241,7 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('lux')
-        plt.savefig(os.path.join(self.plotpath,'brightness.png'))
+        plt.savefig(os.path.join(self.plotpath,'brightness.svg'))
         plt.close()
 
     def dust(self):
@@ -255,7 +255,7 @@ class NightShow():
         self.plot_xticks()
         plt.grid()
         plt.ylabel('dust')
-        plt.savefig(os.path.join(self.plotpath,'dust.png'))
+        plt.savefig(os.path.join(self.plotpath,'dust.svg'))
         plt.close()
 
 def removefile(filename):
@@ -271,25 +271,25 @@ if __name__ == '__main__':
     try:
         nightshow.temperatures()
     except:
-        removefile('temperatures.png')
+        removefile('temperatures.svg')
     try:
         nightshow.humidities()
     except:
-        removefile('humidities.png')
+        removefile('humidities.svg')
     try:
         nightshow.pressure()
     except ValueError:
-        removefile('pressure.png')
+        removefile('pressure.svg')
     try:
         nightshow.brightness()
     except ValueError:
-        removefile('brightness.png')
+        removefile('brightness.svg')
     try:
         nightshow.dust()
     except ValueError:
-        removefile('dust.png')
+        removefile('dust.svg')
     try:
         nightshow.winds()
     except ValueError:
-        removefile('winds.png')
+        removefile('winds.svg')
     

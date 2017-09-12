@@ -6,20 +6,15 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
 import numpy as np
-
+import config
 
 class ObservationLog():
     def __init__(self, instrument=1):
-        database  = 'stella'
-        user = 'guest'
-        host = 'pera.aip.de'
-        password='IwmDs!'
-        
         self.instrument = instrument
-        database = psycopg2.connect(database=database, 
-                                    user=user, 
-                                    host=host, 
-                                    password=password) 
+        database = psycopg2.connect(database=config.dbname, 
+                                    user=config.dbuser, 
+                                    host=config.dbhost, 
+                                    password=config.dbpassword) 
         cursor = database.cursor()
         query = """SELECT object, min(dateobs) 
         from obs 
@@ -107,7 +102,7 @@ class ObservationLog():
         plt.xlabel('time')
         plt.ylim(-1,len(self.objects))
         plt.grid()
-        plt.savefig('obslog%d.png' % self.instrument)
+        plt.savefig('obslog%d.svg' % self.instrument)
         #plt.show()
         plt.close()
 
