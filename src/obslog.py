@@ -47,6 +47,14 @@ class ObservationLog():
         rcParams.update(params)
 
     def plot(self):
+        def colorhash(s):
+            colorsum = 0
+            for i in range(len(s)):
+                modpos = 255**(i % 3)
+                colorsum += ord(s[i])*modpos
+            colorsum = colorsum % 0xffffff
+            return '#%0*X' % (6,colorsum)
+        
         filters = {'U': 'darkviolet', 
                    'B': 'blue', 
                    'V': 'green', 
@@ -55,9 +63,9 @@ class ObservationLog():
                    'u': 'darkviolet',
                    'v': 'purple',
                    'b': 'blue',
-                   'y': 'y', 
+                   'y': 'yellow', 
                    'hbn':'darkcyan','hbw':'cyan',
-                   'han':'#A00000','haw':'#A00000',
+                   'han':'firebrick','haw':'darkred',
                     'clear': 'ghostwhite',
                     'up': 'midnightblue',
                     'gp': 'steelblue',
@@ -65,9 +73,11 @@ class ObservationLog():
                     'ip': 'brown',                                                                                                                                                        
                     'zp': 'maroon',
                     'ThAr night': 'orange','ThAr day': 'orange',
-                    'ThAr bad weather': 'orange', 'Bias STELLA2':'b',
-                    'Flat Field long': 'slategrey'}
-        
+                    'ThAr bad weather': 'orange', 'Bias STELLA2':'black',
+                    'Flat Field long': 'slategrey',
+                    'Twilight Sky Spectra': 'skyblue',
+                    'Vega': 'azure'}
+    
         plt.subplot(1,1,1)
         obj_pos = np.arange(len(self.objects))
         objarray = list(self.objects)
@@ -83,8 +93,10 @@ class ObservationLog():
             elif obj in filters:
                 filtercol = filters[obj]
             else:
-                print '"%s" "%s"' % (cfilter, obj)
-                filtercol= 'm'
+                #print '"%s" "%s"' % (cfilter, obj)
+                #print colorhash(obj)
+                filtercol= colorhash(obj)
+                #filtercol='c'
             
             plt.barh(ypos, width, left=left, align='center', color=filtercol, edgecolor=filtercol)
         plt.yticks(obj_pos, self.objects)
