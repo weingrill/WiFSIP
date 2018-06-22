@@ -47,13 +47,26 @@ class ObservationLog():
         rcParams.update(params)
 
     def plot(self):
-        filters = {'V': 'g', 'B':'b', 'R': 'r', 'y': 'y', 
-                   'I':'#7F0000', 'U': '#6C2DC7', 'hbn':'c','hbw':'c',
+        filters = {'U': 'darkviolet', 
+                   'B': 'blue', 
+                   'V': 'green', 
+                   'R': 'red', 
+                   'I': 'maroon',
+                   'u': 'darkviolet',
+                   'v': 'purple',
+                   'b': 'blue',
+                   'y': 'y', 
+                   'hbn':'darkcyan','hbw':'cyan',
                    'han':'#A00000','haw':'#A00000',
-                   'rp':'#FF3030',
-                   'ThAr night': 'orange','ThAr day': 'orange',
-                   'ThAr bad weather': 'orange', 'Bias STELLA2':'b',
-                   'Flat Field long': 'g'}
+                    'clear': 'ghostwhite',
+                    'up': 'midnightblue',
+                    'gp': 'steelblue',
+                    'rp': 'orangered',                                                                                                                                                        
+                    'ip': 'brown',                                                                                                                                                        
+                    'zp': 'maroon',
+                    'ThAr night': 'orange','ThAr day': 'orange',
+                    'ThAr bad weather': 'orange', 'Bias STELLA2':'b',
+                    'Flat Field long': 'slategrey'}
         
         plt.subplot(1,1,1)
         obj_pos = np.arange(len(self.objects))
